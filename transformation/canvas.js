@@ -5,14 +5,6 @@ const c = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// Variables
-const colors = [
-  '#2185C5',
-  '#7ECEFD',
-  '#FFF6E5',
-  '#FF7F66'
-];
-
 // Event Listeners
 addEventListener('resize', () => {
   canvas.width = innerWidth;
@@ -21,8 +13,8 @@ addEventListener('resize', () => {
   init();
 });
 
-// Utillities
-function randomColor(colors) { return colors[Math.floor(Math.random() * colors.length)]; }
+// Utility Functions
+function randomIntFromRange(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
 
 // Objects
 function point(x, y) {
@@ -49,16 +41,20 @@ function circle(x, y, radius) {
 }
 
 // Implementation
+let y = [];
+let fourierY = [];
+
 function init() {
   c.translate(300, canvas.height / 2);
-  y = [100, 100, 100, -100, -100, -100, 100, 100, 100, -100, -100, -100];
+
+  for (let i = 0; i < 100; i++) {
+    y[i] = i;
+  }
+
   fourierY = fourierTransform(y);
 }
 
 // Animation Loop
-let y = [];
-let fourierY;
-
 let time = 0;
 let wave = [];
 let first = true;
@@ -73,28 +69,32 @@ function animate() {
     let prevx = x;
     let prevy = y;
 
-    // let n = i * 2 + 1;
-    // let radius = 100 * (4 / (n * Math.PI));
-    //
-    // x += radius * Math.cos(n * time);
-    // y += radius * Math.sin(n * time);
-    //
-    // circle(prevx, prevy, radius, false);
-    // line(prevx, prevy, x, y);
+    let freq = fourierY[i].freq;
+    let radius = fourierY[i].amp;
+    let phase = fourierY[i].phase;
+
+    // s_hat * cos(omega * t + phi) -> Elongation-Zeit
+    x += radius * Math.cos(freq * time + phase + Math.PI / 2);
+    y += radius * Math.sin(freq * time + phase + Math.PI / 2);
+
+    circle(prevx, prevy, radius, false);
+    line(prevx, prevy, x, y);
   }
   wave.unshift(y);
 
-  // line(x, y, 200, wave[0]);
-  // if (!first) {
-  //   for (let i = 0; i < wave.length; i++) {
-  //     point(i + 200, wave[i]);
-  //     line(i + 200, wave[i], i + 200 + 1, wave[i + 1]);
-  //   }
-  // }
+  line(x, y, 200, wave[0]);
+  if (!first) {
+    for (let i = 0; i < wave.length; i++) {
+      point(i + 200, wave[i]);
+      line(i + 200, wave[i], i + 200 + 1, wave[i + 1]);
+    }
+  }
+
+  const dt = (Math.PI * 2) / fourierY.length;
+  time += dt;
+  first = false;
 
   if (wave.length > 900) { wave.pop(); }
-  time -= 0.02;
-  first = false;
 }
 
 init();

@@ -17,7 +17,7 @@ function fourierTransform(x) {
     }
 
     re /= N;
-    re /= N;
+    im /= N;
 
     let freq  = k;
     let amp = Math.sqrt(re ** 2 + im ** 2);
