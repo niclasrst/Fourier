@@ -66,6 +66,8 @@ let x = [], y = [];
 let fourierX = [], fourierY = [];
 
 function init() {
+  c.translate(canvas.width / 2, canvas.height / 2);
+
   for (let i = 0; i < 100; i++) {
     angle = map(i, 0, 100, 0, Math.PI * 2);
     x[i] = 100 * Math.cos(angle);
@@ -79,8 +81,8 @@ function init() {
   fourierX = fourierTransform(x);
   fourierY = fourierTransform(y);
 
-  fourierX.sort((a, b) => b.amp - a.amp);
-  fourierY.sort((a, b) => b.amp - a.amp);
+  fourierX.sort();
+  fourierY.sort();
 }
 
 // Animation Loop
@@ -90,10 +92,10 @@ let first = true;
 
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(0, 0, canvas.width, canvas.height);
+  c.clearRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
 
-  let vx = epiCycles(canvas.width / 2, 100, 0, fourierX);
-  let vy = epiCycles(100, canvas.height / 2, Math.PI / 2, fourierY);
+  let vx = epiCycles(0, -200, 0, fourierX);
+  let vy = epiCycles(-200, 0, Math.PI / 2, fourierY);
   let v = new Vector(vx.x, vy.y);
   path.unshift(v);
 
