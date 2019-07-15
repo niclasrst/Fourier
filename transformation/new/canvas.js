@@ -5,12 +5,47 @@ const c = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+const mouse = {
+  x: innerWidth / 2,
+  y: innerHeight / 2
+};
+
 // Event Listeners
+addEventListener('mousemove', event => {
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
+});
+
 addEventListener('resize', () => {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
 
   init();
+});
+
+addEventListener('mousedown', () => {
+  state = USER;
+  drawing = [];
+  x = [];
+  y = [];
+  time = 0;
+  path = [];
+});
+
+addEventListener('mouseup', () => {
+  state = FOURIER;
+
+  const step = 1;
+  for (let i = 0; i < drawing.length; i += step) {
+    x.push(drawing[i].x);
+    y.push(drawing[i].y);
+  }
+
+  fourierX = fourierTransform(x);
+  fourierY = fourierTransform(y);
+
+  fourierX.sort((a, b) => b.amp - a.amp);
+  fourierY.sort((a, b) => b.amp - a.amp);
 });
 
 // Utility Functions
@@ -20,7 +55,7 @@ function map(value, a, b, c, d) { return c + ((value - a) / (b - a)) * (d - c); 
 // Objects
 function point(x, y) {
   c.beginPath();
-  c.arc(x, y, 1, 0, 2 * Math.PI, true);
+  c.arc(x, y, 5, 0, 2 * Math.PI, true);
   c.fill();
   c.closePath();
 }
@@ -65,55 +100,48 @@ function epiCycles(x, y, rotation, fourier) {
 let x = [], y = [];
 let fourierX = [], fourierY = [];
 
-function init() {
-  c.translate(canvas.width / 2, canvas.height / 2);
-
-  for (let i = 0; i < 100; i++) {
-    angle = map(i, 0, 100, 0, Math.PI * 2);
-    x[i] = 100 * Math.cos(angle);
-  }
-
-  for (let i = 0; i < 100; i++) {
-    angle = map(i, 0, 100, 0, Math.PI * 2);
-    y[i] = 100 * Math.sin(angle);
-  }
-
-  fourierX = fourierTransform(x);
-  fourierY = fourierTransform(y);
-
-  fourierX.sort();
-  fourierY.sort();
-}
+function init() { state = -1; }
 
 // Animation Loop
+const USER = 0;
+const FOURIER = 1;
+
 let time = 0;
 let path = [];
-let first = true;
+let drawing = [];
+let state = -1;
 
 function animate() {
   requestAnimationFrame(animate);
-  c.clearRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
+  c.clearRect(0, 0, canvas.width, canvas.height);
 
-  let vx = epiCycles(0, -200, 0, fourierX);
-  let vy = epiCycles(-200, 0, Math.PI / 2, fourierY);
-  let v = new Vector(vx.x, vy.y);
-  path.unshift(v);
+  if (state == USER) {
+    let point = new Vector(mouse.x - canvas.width / 2, mouse.y - canvas.height / 2);
+    drawing.push(point);
 
-  line(vx.x, vx.y, v.x, v.y);
-  line(vy.x, vy.y, v.x, v.y);
+    for (let v of drawing) {
+      point(v.x + canvas.width / 2, v.y + canvas.height / 2);
+    }
 
-  if (!first) {
+  } else if (state == FOURIER) {
+    let vx = epiCycles(canvas.width / 2, 100, 0, fourierX);
+    let vy = epiCycles(100, canvas.height / 2, Math.PI / 2, fourierY);
+    let v = new Vector(vx.x, vy.y);
+    path.unshift(v);
+
+    line(vx.x, vx.y, v.x, v.y);
+    line(vy.x, vy.y, v.x, v.y);
+
     for (let i = 0; i < path.length; i++) {
       point(path[i].x, path[i].y);
-      //line(path[i].x, path[i].y, path[i+1].x, path[i+1].y);
     }
+
+    const dt = (Math.PI * 2) / fourierY.length;
+    time += dt;
+
+    if (time > (Math.PI * 2)) { time = 0; path = []; }
   }
 
-  const dt = (Math.PI * 2) / fourierY.length;
-  time -= dt;
-  first = false;
-
-  if (path.length > 75) { path.pop(); }
 }
 
 init();
