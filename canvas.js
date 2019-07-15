@@ -54,6 +54,7 @@ function init() { c.translate(300, canvas.height / 2); }
 // Animation Loop
 let time = 0;
 let wave = [];
+let first = true;
 
 function animate() {
   requestAnimationFrame(animate);
@@ -61,7 +62,7 @@ function animate() {
 
   let x = 0, y = 0;
 
-  for (let i = 0; i < 300; i++) {
+  for (let i = 0; i < 5; i++) {
     let prevx = x;
     let prevy = y;
 
@@ -77,12 +78,16 @@ function animate() {
   wave.unshift(y);
 
   line(x, y, 200, wave[0]);
-  for (let i = 0; i < wave.length; i++) {
-    point(i + 200, wave[i]);
+  if (!first) {
+    for (let i = 0; i < wave.length; i++) {
+      point(i + 200, wave[i]);
+      line(i + 200, wave[i], i + 200 + 1, wave[i + 1]);
+    }
   }
 
   if (wave.length > 900) { wave.pop(); }
   time -= 0.02;
+  first = false;
 }
 
 init();
