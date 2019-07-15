@@ -15,6 +15,7 @@ addEventListener('resize', () => {
 
 // Utility Functions
 function randomIntFromRange(min, max) { return Math.floor(Math.random() * (max - min + 1) + min); }
+function map(value, a, b, c, d) { return c + ((value - a) / (b - a)) * (d - c); }
 
 // Objects
 function point(x, y) {
@@ -40,61 +41,76 @@ function circle(x, y, radius) {
   c.closePath();
 }
 
-// Implementation
-let y = [];
-let fourierY = [];
+function epiCycles(x, y, rotation, fourier) {
+  for (let i = 0; i < fourier.length; i++) {
+    let prevx = x;
+    let prevy = y;
 
-function init() {
-  c.translate(300, canvas.height / 2);
+    let freq = fourier[i].freq;
+    let radius = fourier[i].amp;
+    let phase = fourier[i].phase;
 
-  for (let i = 0; i < 100; i++) {
-    y[i] = i;
+    // s_hat * cos(omega * t + phi) -> Elongation-Zeit
+    x += radius * Math.cos(freq * time + phase + rotation);
+    y += radius * Math.sin(freq * time + phase + rotation);
+
+    circle(prevx, prevy, radius);
+    line(prevx, prevy, x, y);
   }
 
+  return new Vector(x, y);
+}
+
+// Implementation
+let x = [], y = [];
+let fourierX = [], fourierY = [];
+
+function init() {
+  c.translate(canvas.width / 2, canvas.height / 2);
+
+  for (let i = 0; i < 100; i++) {
+    angle = map(i, 0, 100, 0, Math.PI * 2);
+    x[i] = 100 * Math.cos(angle);
+  }
+
+  for (let i = 0; i < 100; i++) {
+    angle = map(i, 0, 100, 0, Math.PI * 2);
+    y[i] = 100 * Math.sin(angle);
+  }
+
+  fourierX = fourierTransform(x);
   fourierY = fourierTransform(y);
 }
 
 // Animation Loop
 let time = 0;
-let wave = [];
+let path = [];
 let first = true;
 
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(-canvas.width, -canvas.height, canvas.width * 2, canvas.height * 2);
 
-  let x = 0, y = 0;
+  let vx = epiCycles(0, -200, 0, fourierX);
+  let vy = epiCycles(-200, 0, Math.PI / 2, fourierY);
+  let v = new Vector(vx.x, vy.y);
+  path.unshift(v);
 
-  for (let i = 0; i < fourierY.length; i++) {
-    let prevx = x;
-    let prevy = y;
+  line(vx.x, vx.y, v.x, v.y);
+  line(vy.x, vy.y, v.x, v.y);
 
-    let freq = fourierY[i].freq;
-    let radius = fourierY[i].amp;
-    let phase = fourierY[i].phase;
-
-    // s_hat * cos(omega * t + phi) -> Elongation-Zeit
-    x += radius * Math.cos(freq * time + phase + Math.PI / 2);
-    y += radius * Math.sin(freq * time + phase + Math.PI / 2);
-
-    circle(prevx, prevy, radius, false);
-    line(prevx, prevy, x, y);
-  }
-  wave.unshift(y);
-
-  line(x, y, 200, wave[0]);
   if (!first) {
-    for (let i = 0; i < wave.length; i++) {
-      point(i + 200, wave[i]);
-      line(i + 200, wave[i], i + 200 + 1, wave[i + 1]);
+    for (let i = 0; i < path.length; i++) {
+      point(path[i].x, path[i].y);
+      //line(path[i].x, path[i].y, path[i+1].x, path[i+1].y);
     }
   }
 
   const dt = (Math.PI * 2) / fourierY.length;
-  time += dt;
+  time -= dt;
   first = false;
 
-  if (wave.length > 900) { wave.pop(); }
+  if (path.length > 75) { path.pop(); }
 }
 
 init();
