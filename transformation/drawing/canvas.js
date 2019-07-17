@@ -23,6 +23,10 @@ let fourierX = [], fourierY = [];
 addEventListener('mousemove', event => {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
+
+  if (state == USER) {
+    drawing.push(new Vector(mouse.x - canvas.width / 2, mouse.y - canvas.height / 2));
+  }
 });
 
 addEventListener('resize', () => {
@@ -112,13 +116,12 @@ function animate() {
   c.clearRect(0, 0, canvas.width, canvas.height);
 
   if (state == USER) {
-    let point = new Vector(mouse.x - canvas.width / 2, mouse.y - canvas.height / 2);
-    drawing.push(point);
+    // let point = new Vector(mouse.x - canvas.width / 2, mouse.y - canvas.height / 2);
+    // drawing.push(point);
 
     for (let v of drawing) {
       point(v.x + canvas.width / 2, v.y + canvas.height / 2);
     }
-
   } else if (state == FOURIER) {
     let vx = epiCycles(canvas.width / 2, 100, 0, fourierX);
     let vy = epiCycles(100, canvas.height / 2, Math.PI / 2, fourierY);
