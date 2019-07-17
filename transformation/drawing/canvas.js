@@ -5,10 +5,19 @@ const c = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+// Variables
+const USER = 0;
+const FOURIER = 1;
 const mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
 };
+
+let time = 0, state = -1;
+let path = [], drawing = [];
+
+let x = [], y = [];
+let fourierX = [], fourierY = [];
 
 // Event Listeners
 addEventListener('mousemove', event => {
@@ -24,12 +33,10 @@ addEventListener('resize', () => {
 });
 
 addEventListener('mousedown', () => {
-  state = USER;
-  drawing = [];
-  x = [];
-  y = [];
   time = 0;
-  path = [];
+  state = USER;
+  x = [], y = [];
+  drawing = [], path = [];
 });
 
 addEventListener('mouseup', () => {
@@ -97,20 +104,9 @@ function epiCycles(x, y, rotation, fourier) {
 }
 
 // Implementation
-let x = [], y = [];
-let fourierX = [], fourierY = [];
-
 function init() { state = -1; }
 
 // Animation Loop
-const USER = 0;
-const FOURIER = 1;
-
-let time = 0;
-let path = [];
-let drawing = [];
-let state = -1;
-
 function animate() {
   requestAnimationFrame(animate);
   c.clearRect(0, 0, canvas.width, canvas.height);
@@ -141,7 +137,6 @@ function animate() {
 
     if (time > (Math.PI * 2)) { time = 0; path = []; }
   }
-
 }
 
 init();
