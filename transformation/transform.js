@@ -11,7 +11,6 @@ function fourierTransform(x) {
 
     for (let n = 0; n < N; n++) {
       let alpha = (2 * Math.PI * k * n) / N;
-
       re += x[n] * Math.cos(alpha);
       im -= x[n] * Math.sin(alpha);
     }

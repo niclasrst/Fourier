@@ -15,9 +15,7 @@ const mouse = {
 
 let time = 0, state = -1;
 let path = [], drawing = [];
-
-let x = [], y = [];
-let fourierX = [], fourierY = [];
+let x = [], fourierX = [];
 
 // Event Listeners
 addEventListener('mousemove', event => {
@@ -37,24 +35,16 @@ addEventListener('resize', () => {
 addEventListener('mousedown', () => {
   time = 0;
   state = USER;
-  x = [], y = [];
-  drawing = [], path = [];
+  drawing = [], path = [], x = [];
 });
 
 addEventListener('mouseup', () => {
   state = FOURIER;
-
   const step = 1;
-  for (let i = 0; i < drawing.length; i += step) {
-    x.push(drawing[i].x);
-    y.push(drawing[i].y);
-  }
+  for (let i = 0; i < drawing.length; i += step) { x.push(new Complex(drawing[i].x, drawing[i].y)); }
 
   fourierX = fourierTransform(x);
-  fourierY = fourierTransform(y);
-
   fourierX.sort((a, b) => b.amp - a.amp);
-  fourierY.sort((a, b) => b.amp - a.amp);
 });
 
 // Utility Functions
@@ -114,21 +104,18 @@ function animate() {
   c.clearRect(0, 0, canvas.width, canvas.height);
 
   if (state == USER) {
-    for (let v of drawing) { point(v.x + canvas.width / 2, v.y + canvas.height / 2); }
+    for (let v of drawing) {
+      point(v.x + canvas.width / 2, v.y + canvas.height / 2);
+    }
   } else if (state == FOURIER) {
-    let vx = epiCycles(canvas.width / 2, 100, 0, fourierX);
-    let vy = epiCycles(100, canvas.height / 2, Math.PI / 2, fourierY);
-    let v = new Vector(vx.x, vy.y);
+    let v = epiCycles(canvas.width / 2, canvas.height / 2, 0, fourierX);
     path.unshift(v);
-
-    line(vx.x, vx.y, v.x, v.y);
-    line(vy.x, vy.y, v.x, v.y);
 
     for (let i = 0; i < path.length; i++) {
       point(path[i].x, path[i].y);
     }
 
-    const dt = (Math.PI * 2) / fourierY.length;
+    const dt = (Math.PI * 2) / fourierX.length;
     time += dt;
     if (time > (Math.PI * 2)) { time = 0; path = []; }
   }
