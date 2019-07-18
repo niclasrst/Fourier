@@ -5,14 +5,6 @@ const c = canvas.getContext('2d');
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
-// Variables
-const colors = [
-  '#2185C5',
-  '#7ECEFD',
-  '#FFF6E5',
-  '#FF7F66'
-];
-
 // Event Listeners
 addEventListener('resize', () => {
   canvas.width = innerWidth;
