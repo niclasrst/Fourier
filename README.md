@@ -1,7 +1,7 @@
 # Product Name
 > Short blurb about what your product does.
 
-One to two paragraph statement about your product and what it does.
+One to two paragraph statement about what it does.
 
 ![](demo.png)
 
