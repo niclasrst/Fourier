@@ -1,7 +1,7 @@
 # Product Name
-> Short blurb about what your product does.
+> Short blurb about what it does.
 
-One to two paragraph statement about what it does.
+This Project is build with javaScript and made to visualize a Fourier Series or transformation.
 
 ![](demo.png)
 
